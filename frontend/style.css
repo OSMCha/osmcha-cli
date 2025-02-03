@@ -1,0 +1,23 @@
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+body {
+  margin: 0;
+  font-family: monospace;
+}
+
+main {
+  height: 100vh;
+}
+
+.maplibregl-popup {
+  font-family: monospace;
+  line-height: 1.0;
+}
+
+table {
+  border-spacing: 0;
+}
+
+th + th, td + td {
+  padding-inline-start: 1em;
+}

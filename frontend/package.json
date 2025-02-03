@@ -1,0 +1,14 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "esbuild main.js style.css --bundle --sourcemap --format=esm --outdir=dist --external:string_decoder"
+  },
+  "dependencies": {
+    "@osmcha/maplibre-adiff-viewer": "^1.0.2",
+    "@osmcha/osm-adiff-parser": "^3.0.0",
+    "maplibre-gl": "^5.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2"
+  }
+}
