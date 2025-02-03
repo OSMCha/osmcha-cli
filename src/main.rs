@@ -24,25 +24,25 @@ fn adiff(config: &State<Config>) -> Option<RawXml<String>> {
 
 #[get("/")]
 fn index() -> RawHtml<&'static str> {
-    let html = include_str!("../frontend/index.html");
+    let html = include_str!(concat!(env!("OUT_DIR"), "/frontend/index.html"));
     RawHtml(html)
 }
 
 #[get("/style.css")]
 fn css() -> RawCss<&'static str> {
-    let css = include_str!("../frontend/dist/style.css");
+    let css = include_str!(concat!(env!("OUT_DIR"), "/frontend/dist/style.css"));
     RawCss(css)
 }
 
 #[get("/main.js")]
 fn bundle() -> RawJavaScript<&'static str> {
-    let js = include_str!("../frontend/dist/main.js");
+    let js = include_str!(concat!(env!("OUT_DIR"), "/frontend/dist/main.js"));
     RawJavaScript(js)
 }
 
 #[get("/main.js.map")]
 fn bundle_map() -> RawJson<&'static str> {
-    let map = include_str!("../frontend/dist/main.js.map");
+    let map = include_str!(concat!(env!("OUT_DIR"), "/frontend/dist/main.js.map"));
     RawJson(map)
 }
 
