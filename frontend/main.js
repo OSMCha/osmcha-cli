@@ -46,9 +46,8 @@ let adiff = await adiffParser(xml);
 let adiffViewer = new MapLibreAugmentedDiffViewer(adiff, { onClick });
 
 let bounds = adiffViewer.bounds();
-console.log(bounds);
 if (shouldJumpToBounds) {
-  map.jumpTo(map.cameraForBounds(bounds, { padding: 50 }));
+  map.jumpTo(map.cameraForBounds(bounds, { padding: 50, maxZoom: 18 }));
 }
 
 map.once("load", () => {
@@ -56,7 +55,9 @@ map.once("load", () => {
 });
 
 function onClick(event, action) {
-  console.log(action);
+  if (!action) {
+    return;
+  }
 
   let popup = new maplibre.Popup();
   popup.setMaxWidth(200);
