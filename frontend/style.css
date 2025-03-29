@@ -16,13 +16,21 @@ main {
 .maplibregl-popup-content {
   font-family: monospace;
   line-height: 1.0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
   row-gap: 1em;
+  max-width: 500px;
 }
 
 .maplibregl-popup-content > * {
   margin: 0;
+  grid-column: 1 / -1;
+}
+
+.maplibregl-popup-content :is(table, thead, tbody, tr) {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
 }
 
 table {
