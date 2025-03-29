@@ -60,8 +60,12 @@ map.once("load", () => {
 
 function onClick(event, action) {
   if (!action) {
+    adiffViewer.deselect();
     return;
   }
+
+  let element = action.new ?? action.old;
+  adiffViewer.select(element.type, element.id);
 
   let popup = new maplibre.Popup();
   popup.setMaxWidth(null);
