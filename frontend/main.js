@@ -94,6 +94,7 @@ function PopupContent({ action }) {
     <>
       <p><strong>${action.new.type}/${action.new.id}</strong>${verb && " was " + verb}</p>
       ${TagsTable({ action })}
+      ${action.new.type === 'relation' ? RelationMembersTable({ action }) : null}
     </>
   `;
 }
@@ -160,4 +161,73 @@ function TagsTable({ action }) {
   } else {
     return html`<p>No tags</p>`;
   }
+}
+
+function RelationMembersTable({ action }) {
+  let allMembers;
+
+  if (action.type === 'create') {
+    allMembers = action.new.members;
+  } else {
+    allMembers = [...action.old.members, ...action.new.members];
+  }
+
+  let allMemberIds = new Set(allMembers.map(m => `${m.type}/${m.ref}`));
+  allMemberIds = [...allMemberIds].sort();
+
+  return html`
+    <table class="member-table">
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${allMemberIds.map(id => {
+          const [type, ref] = id.split('/');
+          const oldMember = action.old?.members.find(
+            m => m.type === type && m.ref === +ref
+          );
+          const newMember = action.new?.members.find(
+            m => m.type === type && m.ref === +ref
+          );
+          const oldrole = oldMember?.role;
+          const newrole = newMember?.role;
+
+          if (oldrole === newrole) {
+            return html`
+              <tr>
+                <td>${id}</td>
+                <td>${newrole}</td>
+              </tr>
+            `;
+          } else if (oldrole === undefined) {
+            return html`
+              <tr class="create">
+                <td>${id}</td>
+                <td>${newrole}</td>
+              </tr>
+            `;
+          } else if (newrole === undefined) {
+            return html`
+              <tr class="delete">
+                <td>${id}</td>
+                <td>${oldrole}</td>
+              </tr>
+            `;
+          } else {
+            return html`
+              <tr class="modify">
+                <td>${id}</td>
+                <td>
+                  <del>${oldrole}</del> → <ins>${newrole}</ins>
+                </td>
+              </tr>
+            `;
+          }
+        })}
+      </tbody>
+    </table>
+  `;
 }
