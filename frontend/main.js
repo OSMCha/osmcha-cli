@@ -11,25 +11,25 @@ let map = new maplibre.Map({
     version: 8,
     sources: {
       bing: {
-        type: 'raster',
+        type: "raster",
         tiles: [
-          'https://ecn.t0.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=587&mkt=en-gb&n=z',
-          'https://ecn.t1.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=587&mkt=en-gb&n=z',
-          'https://ecn.t2.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=587&mkt=en-gb&n=z',
-          'https://ecn.t3.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=587&mkt=en-gb&n=z'
+          "https://ecn.t0.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=587&mkt=en-gb&n=z",
+          "https://ecn.t1.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=587&mkt=en-gb&n=z",
+          "https://ecn.t2.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=587&mkt=en-gb&n=z",
+          "https://ecn.t3.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=587&mkt=en-gb&n=z",
         ],
         tileSize: 256,
         maxzoom: 20,
-        attribution: 'Imagery © Microsoft Corporation',
-      }
+        attribution: "Imagery © Microsoft Corporation",
+      },
     },
     layers: [
       {
-        id: 'imagery',
-        type: 'raster',
-        source: 'bing'
-      }
-    ]
+        id: "imagery",
+        type: "raster",
+        source: "bing",
+      },
+    ],
   },
   maxZoom: 22,
   hash: true,
@@ -62,52 +62,78 @@ function onClick(event, action) {
   let popup = new maplibre.Popup();
   popup.setMaxWidth(200);
   popup.setLngLat(event.lngLat);
-  let htmlContent = ""
-  htmlContent += `<h3>${action.new.type}/${action.new.id}</h3>`;
+  let htmlContent = "";
 
-  switch (action.action) {
-  case "create":
-    htmlContent += `<p>created</p>`; break;
-  case "modify":
-    htmlContent += `<p>modified</p>`; break;
-  case "delete":
-    htmlContent += `<p>deleted</p>`; break;
+  let verb = null;
+  switch (action.type) {
+    case "create":
+      verb = "created";
+      break;
+    case "modify":
+      verb = "modified";
+      break;
+    case "delete":
+      verb = "deleted";
+      break;
   }
-  htmlContent += "<table>";
-  
-  if (action.type === "modify") {
-    let allKeys = [...new Set([...Object.keys(action.old.tags), ...Object.keys(action.new.tags)])].sort();
-    for (let key of allKeys) {
-      let oldval = action.old.tags[key] ?? "";
-      let newval = action.new.tags[key] ?? "";
-      
-      htmlContent += `<tr><td>${key}</td>`
 
-      if (oldval != newval) {
-        let color = "rgba(232, 232, 69, 0.3)";
-        if (oldval === "") {
-          color = "rgba(57, 219, 192, 0.3)";
-        } else if (newval === "") {
-          color = "rgba(204, 44, 71, 0.3)";
-        }
-        htmlContent += `<td style="background: ${color}">${oldval}</td>`
-        htmlContent += `<td style="background: ${color}">${newval}</td>`
+  htmlContent += `<p><strong>${action.new.type}/${action.new.id}</strong>${verb && " was " + verb}</p>`;
+
+  let allKeys = new Set([...Object.keys(action.old.tags), ...Object.keys(action.new.tags)]);
+  let sortedKeys = Array.from(allKeys).sort();
+
+  if (sortedKeys.length > 0) {
+    htmlContent += "<table>";
+    htmlContent += `
+      <thead>
+        <tr>
+          <th>Tag</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+    `;
+
+    for (let key of sortedKeys) {
+      let oldval = action.old ? action.old.tags[key] : undefined;
+      let newval = action.new ? action.new.tags[key] : undefined;
+
+      if (oldval === newval) {
+        htmlContent += `
+          <tr>
+            <td>${key}</td>
+            <td>${newval}</td>
+          </tr>
+        `;
+      } else if (oldval === undefined) {
+        htmlContent += `
+          <tr class="create">
+            <td>${key}</td>
+            <td>${newval}</td>
+          </tr>
+        `;
+      } else if (newval === undefined) {
+        htmlContent += `
+          <tr class="delete">
+            <td>${key}</td>
+            <td>${oldval}</td>
+          </tr>
+        `;
       } else {
-        htmlContent += `<td>${oldval}</td><td>${newval}</td>`;
+        htmlContent += `
+          <tr class="modify">
+            <td>${key}</td>
+            <td>
+              <del>${oldval}</del> → <ins>${newval}</ins>
+            </td>
+          </tr>
+        `;
       }
-
-      htmlContent += `</tr>`
     }
-    
+    htmlContent += "</table>";
   } else {
-    let elem = action.action === "delete" ? action.old : action.new;
-    for (let [key, val] of Object.entries(elem.tags)) {
-      htmlContent += `<tr><td>${key}</td><td>${val}</td></tr>`;
-    }
+    htmlContent += "<p>No tags</p>";
   }
 
-  htmlContent += "</table>";
-  
   popup.setHTML(htmlContent);
   popup.addTo(map);
 }

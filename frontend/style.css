@@ -3,21 +3,62 @@
 body {
   margin: 0;
   font-family: monospace;
+
+  --color-create: #007554;
+  --color-modify: #b77a00;
+  --color-delete: #ee0028;
 }
 
 main {
   height: 100vh;
 }
 
-.maplibregl-popup {
+.maplibregl-popup-content {
   font-family: monospace;
   line-height: 1.0;
+  display: flex;
+  flex-direction: column;
+  row-gap: 1em;
+}
+
+.maplibregl-popup-content > * {
+  margin: 0;
 }
 
 table {
   border-spacing: 0;
 }
 
-th + th, td + td {
+th {
+  text-align: left;
+}
+
+th + th,
+td + td {
   padding-inline-start: 1em;
+}
+
+tr.create {
+  color: var(--color-create);
+  background-color: #dbfff5;
+}
+
+tr.modify {
+  color: var(--color-modify);
+  background-color: #fff3da;
+}
+
+tr.delete {
+  color: var(--color-delete);
+  background-color: #ffe3e7;
+}
+
+ins {
+  color: var(--color-create);
+  text-decoration: none;
+}
+
+del {
+  color: var(--color-delete);
+  text-decoration: none;
 }
