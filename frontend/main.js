@@ -99,7 +99,15 @@ function PopupContent({ action }) {
 }
 
 function TagsTable({ action }) {
-  let allKeys = new Set([...Object.keys(action.old.tags), ...Object.keys(action.new.tags)]);
+  let allKeys;
+  if (action.type === 'create') {
+    allKeys = new Set(Object.keys(action.new.tags));
+  } else {
+    allKeys = new Set([
+      ...Object.keys(action.old.tags),
+      ...Object.keys(action.new.tags)
+    ]);
+  }
   let sortedKeys = Array.from(allKeys).sort();
 
   if (sortedKeys.length > 0) {
