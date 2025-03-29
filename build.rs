@@ -1,5 +1,7 @@
 use std::env;
+use std::path::Path;
 use std::process::Command;
+use std::{fs, io};
 
 fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
@@ -12,10 +14,7 @@ fn main() {
     // because building the frontend code requires installing node_modules and
     // generating files in dist/, and Cargo will refuse to build if build.rs
     // "dirties" the source directory.
-    Command::new("cp")
-        .args(&["-r", "frontend/", &format!("{}/frontend", &out_dir)])
-        .status()
-        .ok()
+    copy_dir_all("frontend", &format!("{}/frontend", &out_dir))
         .expect("copying frontend code to OUT_DIR failed");
 
     // Run npm install for frontend/ (in the OUT_DIR)
@@ -23,7 +22,6 @@ fn main() {
         .args(&["install"])
         .current_dir(&format!("{}/frontend", &out_dir))
         .status()
-        .ok()
         .expect("'npm install' failed");
 
     // Run npm run build for frontend/ (in the OUT_DIR)
@@ -31,6 +29,18 @@ fn main() {
         .args(&["run", "build"])
         .current_dir(&format!("{}/frontend", &out_dir))
         .status()
-        .ok()
         .expect("'npm run build' failed");
+}
+
+fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
+    fs::create_dir_all(&dst)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        if entry.file_type()?.is_dir() {
+            copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        } else {
+            fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        }
+    }
+    Ok(())
 }
