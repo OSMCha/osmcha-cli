@@ -6,7 +6,9 @@
   "dependencies": {
     "@osmcha/maplibre-adiff-viewer": "^1.2.1",
     "@osmcha/osm-adiff-parser": "^3.0.0",
-    "maplibre-gl": "^5.1.0"
+    "htm": "^3.1.1",
+    "maplibre-gl": "^5.1.0",
+    "vhtml": "^2.2.0"
   },
   "devDependencies": {
     "esbuild": "^0.24.2"

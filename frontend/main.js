@@ -1,6 +1,10 @@
 import maplibre from "maplibre-gl";
 import adiffParser from "@osmcha/osm-adiff-parser";
 import { MapLibreAugmentedDiffViewer } from "@osmcha/maplibre-adiff-viewer";
+import htm from 'htm/mini';
+import h from 'vhtml';
+
+const html = htm.bind(h);
 
 let container = document.querySelector("main");
 let shouldJumpToBounds = window.location.hash === "";
@@ -60,10 +64,15 @@ function onClick(event, action) {
   }
 
   let popup = new maplibre.Popup();
-  popup.setMaxWidth(200);
+  popup.setMaxWidth(null);
   popup.setLngLat(event.lngLat);
-  let htmlContent = "";
 
+  const content = PopupContent({ action });
+  popup.setHTML(content);
+  popup.addTo(map);
+}
+
+function PopupContent({ action }) {
   let verb = null;
   switch (action.type) {
     case "create":
@@ -77,63 +86,66 @@ function onClick(event, action) {
       break;
   }
 
-  htmlContent += `<p><strong>${action.new.type}/${action.new.id}</strong>${verb && " was " + verb}</p>`;
+  return html`
+    <>
+      <p><strong>${action.new.type}/${action.new.id}</strong>${verb && " was " + verb}</p>
+      ${TagsTable({ action })}
+    </>
+  `;
+}
 
+function TagsTable({ action }) {
   let allKeys = new Set([...Object.keys(action.old.tags), ...Object.keys(action.new.tags)]);
   let sortedKeys = Array.from(allKeys).sort();
 
   if (sortedKeys.length > 0) {
-    htmlContent += "<table>";
-    htmlContent += `
-      <thead>
-        <tr>
-          <th>Tag</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-    `;
-
-    for (let key of sortedKeys) {
-      let oldval = action.old ? action.old.tags[key] : undefined;
-      let newval = action.new ? action.new.tags[key] : undefined;
-
-      if (oldval === newval) {
-        htmlContent += `
+    return html`
+      <table>
+        <thead>
           <tr>
-            <td>${key}</td>
-            <td>${newval}</td>
+            <th>Tag</th>
+            <th>Value</th>
           </tr>
-        `;
-      } else if (oldval === undefined) {
-        htmlContent += `
-          <tr class="create">
-            <td>${key}</td>
-            <td>${newval}</td>
-          </tr>
-        `;
-      } else if (newval === undefined) {
-        htmlContent += `
-          <tr class="delete">
-            <td>${key}</td>
-            <td>${oldval}</td>
-          </tr>
-        `;
-      } else {
-        htmlContent += `
-          <tr class="modify">
-            <td>${key}</td>
-            <td>
-              <del>${oldval}</del> → <ins>${newval}</ins>
-            </td>
-          </tr>
-        `;
-      }
-    }
-    htmlContent += "</table>";
-  } else {
-    htmlContent += "<p>No tags</p>";
-  }
+        </thead>
+        ${sortedKeys.map(key => {
+          const oldval = action.old ? action.old.tags[key] : undefined;
+          const newval = action.new ? action.new.tags[key] : undefined;
 
-  popup.setHTML(htmlContent);
-  popup.addTo(map);
+          if (oldval === newval) {
+            return html`
+              <tr>
+                <td>${key}</td>
+                <td>${newval}</td>
+              </tr>
+            `;
+          } else if (oldval === undefined) {
+            return html`
+              <tr class="create">
+                <td>${key}</td>
+                <td>${newval}</td>
+              </tr>
+            `;
+          } else if (newval === undefined) {
+            return html`
+              <tr class="delete">
+                <td>${key}</td>
+                <td>${oldval}</td>
+              </tr>
+            `;
+          } else {
+            return html`
+              <tr class="modify">
+                <td>${key}</td>
+                <td>
+                  <del>${oldval}</del> → <ins>${newval}</ins>
+                </td>
+              </tr>
+            `;
+          }
+        })}
+      </table>
+    `;
+  } else {
+    return html`<p>No tags</p>`;
+  }
 }
