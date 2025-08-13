@@ -9,6 +9,15 @@ const html = htm.bind(h);
 let container = document.querySelector("main");
 let shouldJumpToBounds = window.location.hash === "";
 
+// Wait for DOM to be fully loaded and styled before initializing map
+await new Promise(resolve => {
+  if (document.readyState === 'complete') {
+    resolve();
+  } else {
+    window.addEventListener('load', resolve);
+  }
+});
+
 let map = new maplibre.Map({
   container,
   style: {
