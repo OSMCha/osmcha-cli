@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 Versioning of this project adheres to the [Semantic Versioning](https://semver.org/spec/v2.0.0.html) spec.
 
+## [1.1.1]
+
+Released 2025-08-12
+
+- Upgrade to `@osmcha/maplibre-adiff-viewer` v1.3.1, fixing another bug that would
+  cause the map not to zoom to the bounding box of the diff correctly
+- Fix a race condition that could cause the map to load before the DOM was ready,
+  resulting in a map that was smaller than the browser viewport
+
 ## [1.1.0]
 
 Released 2025-03-29
@@ -29,6 +38,7 @@ Released 2025-02-03
 
 Initial release.
 
+[1.1.1]: https://github.com/OSMCha/osmcha-cli/releases/tag/v1.1.1
 [1.1.0]: https://github.com/OSMCha/osmcha-cli/releases/tag/v1.1.0
 [1.0.1]: https://github.com/OSMCha/osmcha-cli/releases/tag/v1.0.1
 [1.0.0]: https://github.com/OSMCha/osmcha-cli/releases/tag/v1.0.0
