@@ -18,26 +18,44 @@ fn main() {
         .expect("copying frontend code to OUT_DIR failed");
 
     // Run npm install for frontend/ (in the OUT_DIR)
-    Command::new("npm")
+    let status = Command::new("npm")
         .args(&["install"])
         .current_dir(&format!("{}/frontend", &out_dir))
         .status()
-        .expect("'npm install' failed");
+        .expect("failed to execute 'npm install'");
+
+    if !status.success() {
+        panic!("'npm install' failed with exit code: {}", status);
+    }
 
     // Run npm run build for frontend/ (in the OUT_DIR)
-    Command::new("npm")
+    let status = Command::new("npm")
         .args(&["run", "build"])
         .current_dir(&format!("{}/frontend", &out_dir))
         .status()
-        .expect("'npm run build' failed");
+        .expect("failed to execute 'npm run build'");
+
+    if !status.success() {
+        panic!("'npm run build' failed with exit code: {}", status);
+    }
 }
 
 fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
     fs::create_dir_all(&dst)?;
     for entry in fs::read_dir(src)? {
         let entry = entry?;
-        if entry.file_type()?.is_dir() {
+        let file_type = entry.file_type()?;
+
+        if file_type.is_dir() {
             copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        } else if file_type.is_symlink() {
+            let resolved_target = fs::canonicalize(entry.path())?;
+
+            if resolved_target.is_dir() {
+                copy_dir_all(resolved_target, dst.as_ref().join(entry.file_name()))?;
+            } else {
+                fs::copy(resolved_target, dst.as_ref().join(entry.file_name()))?;
+            }
         } else {
             fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
         }
